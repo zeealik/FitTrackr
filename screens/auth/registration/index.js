@@ -8,9 +8,9 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import * as Yup from 'yup';
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
-import { isValidEmail } from '../../../utils/validations';
+import {isValidEmail} from '../../../utils/validations';
+import {signupSchema} from '../../../utils/yup-schemas';
 
 export const SignupScreen = ({navigation}) => {
   const [name, setName] = useState('');
@@ -23,17 +23,8 @@ export const SignupScreen = ({navigation}) => {
       return;
     }
     try {
-      const schema = Yup.object().shape({
-        email: Yup.string()
-          .email('Invalid email')
-          .required('Email is required'),
-        password: Yup.string()
-          .min(8, 'Password must be at least 8 characters')
-          .required('Password is required'),
-      });
-
       // Validate input data using the schema
-      await schema.validate({email, password});
+      await signupSchema.validate({name, email, password});
 
       // Implement user registration logic here
       // Assuming you have a local database of users

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {
   Text,
@@ -7,15 +7,27 @@ import {
   Button,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
+import {loginSchema} from '../../../utils/yup-schemas';
 
 export const LoginScreen = () => {
   const navigation = useNavigation();
-  const handleLogin = () => {
-    // Implement your login logic here
-    // For now, let's just log a message
-    console.log('Login button pressed');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      // Validate input data using the schema
+      await loginSchema.validate({email, password});
+
+      // Implement your actual login logic here
+      // For now, let's just log a message
+      console.log('Login button pressed');
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   const navigateToSignup = () => {
@@ -25,8 +37,19 @@ export const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.appName}>FitTrackr</Text>
-      <TextInput style={styles.input} placeholder="Email" />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
       <Button title="Login" onPress={handleLogin} />
       <TouchableOpacity onPress={navigateToSignup}>
         <Text style={styles.signupText}>New user? Sign up</Text>
