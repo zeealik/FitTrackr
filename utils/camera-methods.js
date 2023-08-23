@@ -53,7 +53,7 @@ export const captureImage = async type => {
   };
   let isCameraPermitted = await requestCameraPermission();
   let isStoragePermitted = await requestExternalWritePermission();
-
+    
   if (isCameraPermitted && isStoragePermitted) {
     return new Promise((resolve, reject) => {
       launchCamera(options, response => {
