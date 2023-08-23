@@ -1,2 +1,2 @@
-export * from './submit-workout';
+export * from './workout-tracking';
 export * from './workout-history';
