@@ -8,12 +8,14 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import {useDispatch} from 'react-redux';
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
 import {isValidEmail} from '../../../utils/validations';
 import {signupSchema} from '../../../utils/yup-schemas';
-import db from '../../../database/db';
+import {signupUser} from '../../../store/auth/authActions';
 
 export const SignupScreen = ({navigation}) => {
+  const dispatch = useDispatch();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,29 +29,22 @@ export const SignupScreen = ({navigation}) => {
     try {
       await signupSchema.validate({name, email, password});
 
-      // Save user record to the database
-      db.transaction(tx => {
-        tx.executeSql(
-          'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-          [name, email, password],
-          (_, result) => {
-            if (result.rowsAffected > 0) {
-              Alert.alert('Success', 'User registered successfully');
-              navigateToLogin();
-            } else {
-              Alert.alert('Error', 'Failed to register user');
-            }
-          },
-          error => {
-            console.error('Error saving user record: ', error);
-          },
-        );
-      });
+      // Dispatch the signup action
+      const response = await dispatch(signupUser({name, email, password}));
+
+      // Handle the signup response as needed
+      if (signupUser.fulfilled.match(response)) {
+        // Signup successful
+        navigateToLogin();
+      } else {
+        // Signup failed
+        Alert.alert('Error', response.payload.message);
+      }
     } catch (error) {
-      Alert.alert('Error', error.message);
+      console.error('Error during signup: ', error);
     }
   };
-  
+
   const navigateToLogin = () => {
     navigation.navigate(SCREEN_ROUTES.LOGIN);
   };
