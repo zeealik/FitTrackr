@@ -23,27 +23,20 @@ db.transaction(tx => {
   );
 });
 
-export const checkLogin = async (email, password) => {
-  return new Promise(resolve => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM users WHERE email = ? AND password = ?',
-        [email, password],
-        (_, result) => {
-          if (result.rows.length > 0) {
-            const user = result.rows.item(0);
-            resolve(user);
-          } else {
-            resolve(null);
-          }
-        },
-        error => {
-          console.error('Error checking user credentials: ', error);
-          resolve(null);
-        },
-      );
-    });
-  });
-};
+// Create the table if it doesn't exist
+db.transaction(tx => {
+  tx.executeSql(
+    `CREATE TABLE IF NOT EXISTS workoutRecords (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT,
+      workoutType TEXT,
+      duration TEXT,
+      distance TEXT,
+      repetitions TEXT,
+      selfiePicture TEXT,
+      time TEXT  
+    );`,
+  );
+});
 
 export default db;

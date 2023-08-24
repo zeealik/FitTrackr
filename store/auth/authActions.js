@@ -1,6 +1,5 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
 import db from '../../database/db';
-import {generateAuthToken} from '../../utils/helpers';
 
 export const signupUser = createAsyncThunk(
   'auth/signupUser',

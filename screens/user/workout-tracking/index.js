@@ -4,15 +4,17 @@ import {
   View,
   TextInput,
   Button,
+  Alert,
   StyleSheet,
   Image,
   TouchableOpacity,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {Picker} from '@react-native-picker/picker';
 import {captureImage} from '../../../utils/camera-methods';
-import { resetWholeState } from '../../../store/auth/authSlice';
+import {resetWholeState} from '../../../store/auth/authSlice';
+import {saveWorkoutRecord} from '../../../store/workout/workoutActions';
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
 import {IMAGES} from '../../../constants/image-urls';
 
@@ -23,14 +25,44 @@ export const WorkoutTrackingScreen = () => {
   const [duration, setDuration] = useState('');
   const [distance, setDistance] = useState('');
   const [repetitions, setRepetitions] = useState('');
-  const [selfieUri, setSelfieUri] = useState(null);
+  const [selfiePicture, setSelfiePicture] = useState(null);
+  const userId = useSelector(state => state.auth.userData.id);
 
   const handleTakeSelfie = async () => {
-    // Implement code to capture a selfie and set selfieUri state
-    // For simplicity, let's assume you have a function to capture a selfie
-    // and it returns the image URI
     const selfieImageUri = await captureImage('photo');
-    setSelfieUri(selfieImageUri);
+    setSelfiePicture(selfieImageUri);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Validate your inputs before proceeding
+
+      // Dispatch the saveWorkoutRecord action
+      const resultAction = await dispatch(
+        saveWorkoutRecord({
+          userId: userId, // Replace with actual user ID
+          workoutType: workoutType,
+          duration: duration,
+          distance: distance,
+          repetitions: repetitions,
+          selfiePicture: selfiePicture,
+        }),
+      );
+
+      // Handle the result from the action
+      if (saveWorkoutRecord.fulfilled.match(resultAction)) {
+        // Clear input fields
+        setWorkoutType('cardio');
+        setDuration('');
+        setDistance('');
+        setRepetitions('');
+        Alert.alert('Success Workout Record Saved', resultAction.payload);
+      } else {
+        Alert.alert('Error', resultAction.error.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   const handleLogout = useCallback(async () => {
@@ -44,10 +76,10 @@ export const WorkoutTrackingScreen = () => {
     <View style={styles.container}>
       <View style={{alignItems: 'center'}}>
         <View style={styles.avatarWrapper}>
-          {selfieUri ? (
+          {selfiePicture ? (
             <Image
               source={{
-                uri: `data:image/jpeg;base64,${selfieUri}`,
+                uri: `data:image/jpeg;base64,${selfiePicture}`,
               }}
               style={styles.userImage}
             />
@@ -58,7 +90,9 @@ export const WorkoutTrackingScreen = () => {
             style={styles.avatarTextWrapper}
             onPress={handleTakeSelfie}>
             <Text style={styles.avatarText}>
-              {selfieUri ? 'Change Profile Picture' : 'Upload Profile Picture'}
+              {selfiePicture
+                ? 'Change Selfie Picture'
+                : 'Upload Selfie Picture'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -103,9 +137,11 @@ export const WorkoutTrackingScreen = () => {
         <Text style={styles.selfieButtonText}>Take a Selfie</Text>
       </TouchableOpacity>
 
-      <View style={styles.saveButtonContainer}>
-        <Button title="Save Workout" />
-      </View>
+      <TouchableOpacity
+        style={styles.saveButtonContainer}
+        onPress={handleSubmit}>
+        <Text style={styles.selfieButtonText}>Save Workout</Text>
+      </TouchableOpacity>
 
       <View style={styles.logoutButtonContainer}>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -157,7 +193,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   saveButtonContainer: {
-    alignItems: 'center', // Center align buttons
+    alignItems: 'center',
+    backgroundColor: 'green',
+    width: '50%',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    height: '5%',
   },
   historyButton: {
     marginTop: 5,
