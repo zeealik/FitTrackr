@@ -11,7 +11,7 @@ import {
 const Stack = createStackNavigator();
 
 export default function ScreenNavigation() {
-  const token = true;
+  const token = false;
 
   if (token) {
     return (

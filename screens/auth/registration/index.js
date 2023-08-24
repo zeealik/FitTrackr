@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Text,
   View,
@@ -11,6 +11,7 @@ import {
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
 import {isValidEmail} from '../../../utils/validations';
 import {signupSchema} from '../../../utils/yup-schemas';
+import db from '../../../database/db';
 
 export const SignupScreen = ({navigation}) => {
   const [name, setName] = useState('');
@@ -22,19 +23,31 @@ export const SignupScreen = ({navigation}) => {
       alert('Please enter a valid email address.');
       return;
     }
+
     try {
-      // Validate input data using the schema
       await signupSchema.validate({name, email, password});
 
-      // Implement user registration logic here
-      // Assuming you have a local database of users
-      // You can add the new user to the database
-      Alert.alert('Success', 'User registered successfully');
+      // Save user record to the database
+      db.transaction(tx => {
+        tx.executeSql(
+          'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+          [name, email, password],
+          (_, result) => {
+            if (result.rowsAffected > 0) {
+              Alert.alert('Success', 'User registered successfully');
+            } else {
+              Alert.alert('Error', 'Failed to register user');
+            }
+          },
+          error => {
+            console.error('Error saving user record: ', error);
+          },
+        );
+      });
     } catch (error) {
       Alert.alert('Error', error.message);
     }
   };
-
   const navigateToLogin = () => {
     navigation.navigate(SCREEN_ROUTES.LOGIN);
   };

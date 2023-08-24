@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
 import {loginSchema} from '../../../utils/yup-schemas';
+import {checkLogin} from '../../../database/db';
 
 export const LoginScreen = () => {
   const navigation = useNavigation();
@@ -21,10 +22,12 @@ export const LoginScreen = () => {
     try {
       // Validate input data using the schema
       await loginSchema.validate({email, password});
-
-      // Implement your actual login logic here
-      // For now, let's just log a message
-      console.log('Login button pressed');
+      const user = await checkLogin(email, password);
+      if (user) {
+        console.log('Login successful');
+      } else {
+        Alert.alert('Error', 'Invalid credentials');
+      }
     } catch (error) {
       Alert.alert('Error', error.message);
     }
