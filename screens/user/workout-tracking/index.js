@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Picker} from '@react-native-picker/picker';
 import {captureImage} from '../../../utils/camera-methods';
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
@@ -28,6 +29,16 @@ export const WorkoutTrackingScreen = () => {
     // and it returns the image URI
     const selfieImageUri = await captureImage('photo');
     setSelfieUri(selfieImageUri);
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Remove the authToken from AsyncStorage
+      await AsyncStorage.removeItem('authToken');
+      // Navigate to the login screen or wherever appropriate
+    } catch (error) {
+      console.error('Error logging out: ', error);
+    }
   };
 
   const goToWorkoutHistory = () =>
@@ -98,6 +109,12 @@ export const WorkoutTrackingScreen = () => {
 
       <View style={styles.saveButtonContainer}>
         <Button title="Save Workout" />
+      </View>
+
+      <View style={styles.logoutButtonContainer}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -195,5 +212,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     backgroundColor: 'gray',
+  },
+  logoutButtonContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  logoutButton: {
+    backgroundColor: 'red',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

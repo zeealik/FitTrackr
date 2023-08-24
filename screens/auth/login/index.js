@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Text,
   View,
@@ -18,13 +19,19 @@ export const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const generateAuthToken = () => {
+    const randomString = Math.random().toString(36).substring(7);
+    return randomString;
+  };
+
   const handleLogin = async () => {
     try {
-      // Validate input data using the schema
       await loginSchema.validate({email, password});
       const user = await checkLogin(email, password);
       if (user) {
-        console.log('Login successful');
+        const authToken = generateAuthToken();
+        await AsyncStorage.setItem('authToken', authToken);
+        console.log('success login')
       } else {
         Alert.alert('Error', 'Invalid credentials');
       }

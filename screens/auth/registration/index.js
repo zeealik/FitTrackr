@@ -35,6 +35,7 @@ export const SignupScreen = ({navigation}) => {
           (_, result) => {
             if (result.rowsAffected > 0) {
               Alert.alert('Success', 'User registered successfully');
+              navigateToLogin();
             } else {
               Alert.alert('Error', 'Failed to register user');
             }
@@ -48,6 +49,7 @@ export const SignupScreen = ({navigation}) => {
       Alert.alert('Error', error.message);
     }
   };
+  
   const navigateToLogin = () => {
     navigation.navigate(SCREEN_ROUTES.LOGIN);
   };
