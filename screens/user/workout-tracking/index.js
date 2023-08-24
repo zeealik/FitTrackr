@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   Text,
   View,
@@ -9,13 +9,15 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useDispatch} from 'react-redux';
 import {Picker} from '@react-native-picker/picker';
 import {captureImage} from '../../../utils/camera-methods';
+import { resetWholeState } from '../../../store/auth/authSlice';
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
 import {IMAGES} from '../../../constants/image-urls';
 
 export const WorkoutTrackingScreen = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [workoutType, setWorkoutType] = useState('cardio');
   const [duration, setDuration] = useState('');
@@ -31,15 +33,9 @@ export const WorkoutTrackingScreen = () => {
     setSelfieUri(selfieImageUri);
   };
 
-  const handleLogout = async () => {
-    try {
-      // Remove the authToken from AsyncStorage
-      await AsyncStorage.removeItem('authToken');
-      // Navigate to the login screen or wherever appropriate
-    } catch (error) {
-      console.error('Error logging out: ', error);
-    }
-  };
+  const handleLogout = useCallback(async () => {
+    dispatch(resetWholeState());
+  });
 
   const goToWorkoutHistory = () =>
     navigation.navigate(SCREEN_ROUTES.WORKOUT_HISTORY);

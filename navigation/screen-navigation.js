@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useSelector} from 'react-redux';
 import {SCREEN_ROUTES} from '../constants/screen-routes';
 import {
   LoginScreen,
@@ -12,22 +12,7 @@ import {
 const Stack = createStackNavigator();
 
 export default function ScreenNavigation() {
-  const [token, setToken] = useState(null);
-
-  // Check for authToken on component mount
-  useEffect(() => {
-    checkAuthToken();
-  }, []);
-
-  const checkAuthToken = async () => {
-    try {
-      const authToken = await AsyncStorage.getItem('authToken');
-      setToken(authToken);
-    } catch (error) {
-      console.error('Error retrieving authToken: ', error);
-    }
-  };
-
+  const {token} = useSelector(store => store.auth);
 
   if (token) {
     return (

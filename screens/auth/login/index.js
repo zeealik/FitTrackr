@@ -10,33 +10,33 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import {useDispatch} from 'react-redux';
+import {loginUser} from '../../../store/auth/authActions';
 import {SCREEN_ROUTES} from '../../../constants/screen-routes';
 import {loginSchema} from '../../../utils/yup-schemas';
-import {checkLogin} from '../../../database/db';
 
 export const LoginScreen = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const generateAuthToken = () => {
-    const randomString = Math.random().toString(36).substring(7);
-    return randomString;
-  };
-
   const handleLogin = async () => {
     try {
       await loginSchema.validate({email, password});
-      const user = await checkLogin(email, password);
-      if (user) {
-        const authToken = generateAuthToken();
-        await AsyncStorage.setItem('authToken', authToken);
-        console.log('success login')
+      // Dispatch the login action
+      const response = await dispatch(loginUser({email, password}));
+
+      // Handle the login response as needed
+      if (loginUser.fulfilled.match(response)) {
+        // Login successful
+        console.log('Success: User logged in');
       } else {
-        Alert.alert('Error', 'Invalid credentials');
+        // Login failed
+        Alert.alert('Error', response.payload.message);
       }
     } catch (error) {
-      Alert.alert('Error', error.message);
+      console.error('Error during login: ', error);
     }
   };
 
