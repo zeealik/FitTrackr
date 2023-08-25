@@ -1,26 +1,25 @@
 import React, {useEffect, useState} from 'react';
 import {Text, View, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
-import {useDispatch} from 'react-redux';
-import { fetchWorkoutRecords } from '../../../store/workout/workoutActions';
-
-// Sample data for demonstration purposes
-const sampleWorkoutHistory = [
-  {id: '1', type: 'Cardio', duration: '30 mins', date: '2023-08-20'},
-  {id: '2', type: 'Strength Training', duration: '45 mins', date: '2023-08-19'},
-  {id: '3', type: 'Cardio', duration: '25 mins', date: '2023-08-18'},
-  // ... more workout history entries
-];
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchWorkoutRecords} from '../../../store/workout/workoutActions';
 
 export const WorkoutHistoryScreen = () => {
   const dispatch = useDispatch();
-  const [workoutHistory, setWorkoutHistory] = useState(sampleWorkoutHistory);
+  const [workoutHistory, setWorkoutHistory] = useState([]);
   const [filter, setFilter] = useState('all'); // Default filter
+  const userId = useSelector(state => state.auth.userData.id);
 
   const fetchRecords = async () => {
     try {
-      let response = await dispatch(fetchWorkoutRecords());
-      console.log('response', response);
+      const response = await dispatch(fetchWorkoutRecords());
+      const responseArray = response?.payload;
+      // Filter the records based on the userId
+      const filteredRecords = responseArray.filter(
+        record => record?.id === userId,
+      );
+      setWorkoutHistory(filteredRecords);
     } catch (error) {
+      console.error('Error', error);
       // Handle error
     }
   };
@@ -29,10 +28,11 @@ export const WorkoutHistoryScreen = () => {
     fetchRecords();
   }, []);
 
-  const filterWorkouts = () => {
+  const applyDateFilters = () => {
+    // Apply the date filters on workoutHistory
     if (filter === 'today') {
       const today = new Date().toISOString().slice(0, 10);
-      const filtered = sampleWorkoutHistory.filter(item => item.date === today);
+      const filtered = workoutHistory.filter(item => item.date === today);
       setWorkoutHistory(filtered);
     } else if (filter === 'thisWeek') {
       const today = new Date();
@@ -47,7 +47,7 @@ export const WorkoutHistoryScreen = () => {
         today.getDate() + (6 - today.getDay()),
       );
 
-      const filtered = sampleWorkoutHistory.filter(item => {
+      const filtered = workoutHistory.filter(item => {
         const workoutDate = new Date(item.date);
         return workoutDate >= startOfWeek && workoutDate <= endOfWeek;
       });
@@ -58,21 +58,22 @@ export const WorkoutHistoryScreen = () => {
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
       const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-      const filtered = sampleWorkoutHistory.filter(item => {
+      const filtered = workoutHistory.filter(item => {
         const workoutDate = new Date(item.date);
         return workoutDate >= startOfMonth && workoutDate <= endOfMonth;
       });
 
       setWorkoutHistory(filtered);
     } else {
-      setWorkoutHistory(sampleWorkoutHistory); // No filter, show all
+      setWorkoutHistory(workoutHistory);
     }
   };
 
   const renderItem = ({item}) => (
     <View style={styles.workoutItem}>
-      <Text style={styles.workoutType}>{item.type}</Text>
+      <Text style={styles.workoutType}>{item.distance}</Text>
       <Text style={styles.workoutDuration}>{item.duration}</Text>
+      <Text style={styles.workoutDuration}>{item.repetitions}</Text>
       <Text style={styles.workoutDate}>{item.date}</Text>
     </View>
   );
@@ -85,7 +86,7 @@ export const WorkoutHistoryScreen = () => {
           style={styles.filterButton}
           onPress={() => {
             setFilter('all');
-            filterWorkouts();
+            applyDateFilters();
           }}>
           <Text>All</Text>
         </TouchableOpacity>
@@ -93,7 +94,7 @@ export const WorkoutHistoryScreen = () => {
           style={styles.filterButton}
           onPress={() => {
             setFilter('today');
-            filterWorkouts();
+            applyDateFilters();
           }}>
           <Text>Today</Text>
         </TouchableOpacity>
@@ -101,7 +102,7 @@ export const WorkoutHistoryScreen = () => {
           style={styles.filterButton}
           onPress={() => {
             setFilter('thisWeek');
-            filterWorkouts();
+            applyDateFilters();
           }}>
           <Text>This Week</Text>
         </TouchableOpacity>
@@ -109,7 +110,7 @@ export const WorkoutHistoryScreen = () => {
           style={styles.filterButton}
           onPress={() => {
             setFilter('thisMonth');
-            filterWorkouts();
+            applyDateFilters();
           }}>
           <Text>This Month</Text>
         </TouchableOpacity>
