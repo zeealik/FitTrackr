@@ -56,7 +56,7 @@ export const WorkoutTrackingScreen = () => {
         setDuration('');
         setDistance('');
         setRepetitions('');
-        Alert.alert('Success Workout Record Saved', resultAction.payload);
+        Alert.alert('Success', resultAction.payload);
       } else {
         Alert.alert('Error', resultAction.error.message);
       }

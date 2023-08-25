@@ -1,6 +1,10 @@
 // workoutSlice.js
 import {createSlice} from '@reduxjs/toolkit';
-import {fetchWorkoutRecords, saveWorkoutRecord} from './workoutActions';
+import {
+  fetchWorkoutRecords,
+  fetchWorkoutRecordsByID,
+  saveWorkoutRecord,
+} from './workoutActions';
 
 const initialState = {
   workoutRecords: [],
@@ -20,7 +24,7 @@ const workoutSlice = createSlice({
   extraReducers: builder => {
     builder
       .addCase(saveWorkoutRecord.fulfilled, (state, action) => {
-        state.workoutRecords = action.payload
+        state.workoutRecords = action.payload;
       })
       .addCase(saveWorkoutRecord.rejected, (state, action) => {
         console.error(action.payload); // Should contain error message
@@ -29,6 +33,12 @@ const workoutSlice = createSlice({
         state.workoutRecords = action.payload; // Update workoutRecords with fetched data
       })
       .addCase(fetchWorkoutRecords.rejected, (state, action) => {
+        console.error(action.payload); // Should contain error message
+      })
+      .addCase(fetchWorkoutRecordsByID.fulfilled, (state, action) => {
+        state.workoutRecords = action.payload; // Update workoutRecords with fetched data
+      })
+      .addCase(fetchWorkoutRecordsByID.rejected, (state, action) => {
         console.error(action.payload); // Should contain error message
       });
   },

@@ -32,7 +32,16 @@ export const saveWorkoutRecord = createAsyncThunk(
             ],
             (_, result) => {
               if (result.rowsAffected > 0) {
-                resolve('Workout record saved successfully');
+                // Resolve with the workout data
+                resolve({
+                  userId,
+                  workoutType,
+                  duration,
+                  distance,
+                  repetitions,
+                  selfiePicture,
+                  time: currentTime,
+                });
               } else {
                 reject('Failed to save workout record');
               }
@@ -51,12 +60,48 @@ export const saveWorkoutRecord = createAsyncThunk(
 
 export const fetchWorkoutRecords = createAsyncThunk(
   'workout/fetchWorkoutRecords',
+  async (_, {rejectWithValue}) => {
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM workoutRecords',
+          [],
+          (txObj, resultSet) => {
+            const records = [];
+            for (let i = 0; i < resultSet.rows.length; i++) {
+              records.push(resultSet.rows.item(i));
+            }
+            resolve(records);
+          },
+          (txObj, error) => {
+            reject(rejectWithValue(error));
+          },
+        );
+      });
+    });
+  },
+);
+
+export const fetchWorkoutRecordsByID = createAsyncThunk(
+  'workout/fetchWorkoutRecordsByID',
   async (userId, {rejectWithValue}) => {
-    try {
-      const response = await fetchWorkoutRecordsApiCall(userId);
-      return response.data; // Return the fetched records
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM workoutRecords WHERE userId = ?',
+          [userId],
+          (txObj, resultSet) => {
+            const records = [];
+            for (let i = 0; i < resultSet.rows.length; i++) {
+              records.push(resultSet.rows.item(i));
+            }
+            resolve(records);
+          },
+          (txObj, error) => {
+            reject(rejectWithValue(error));
+          },
+        );
+      });
+    });
   },
 );

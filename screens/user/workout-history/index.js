@@ -1,17 +1,33 @@
-import React, { useState } from 'react';
-import { Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Text, View, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import {useDispatch} from 'react-redux';
+import { fetchWorkoutRecords } from '../../../store/workout/workoutActions';
 
 // Sample data for demonstration purposes
 const sampleWorkoutHistory = [
-  { id: '1', type: 'Cardio', duration: '30 mins', date: '2023-08-20' },
-  { id: '2', type: 'Strength Training', duration: '45 mins', date: '2023-08-19' },
-  { id: '3', type: 'Cardio', duration: '25 mins', date: '2023-08-18' },
+  {id: '1', type: 'Cardio', duration: '30 mins', date: '2023-08-20'},
+  {id: '2', type: 'Strength Training', duration: '45 mins', date: '2023-08-19'},
+  {id: '3', type: 'Cardio', duration: '25 mins', date: '2023-08-18'},
   // ... more workout history entries
 ];
 
 export const WorkoutHistoryScreen = () => {
+  const dispatch = useDispatch();
   const [workoutHistory, setWorkoutHistory] = useState(sampleWorkoutHistory);
   const [filter, setFilter] = useState('all'); // Default filter
+
+  const fetchRecords = async () => {
+    try {
+      let response = await dispatch(fetchWorkoutRecords());
+      console.log('response', response);
+    } catch (error) {
+      // Handle error
+    }
+  };
+
+  useEffect(() => {
+    fetchRecords();
+  }, []);
 
   const filterWorkouts = () => {
     if (filter === 'today') {
@@ -20,8 +36,16 @@ export const WorkoutHistoryScreen = () => {
       setWorkoutHistory(filtered);
     } else if (filter === 'thisWeek') {
       const today = new Date();
-      const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
-      const endOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (6 - today.getDay()));
+      const startOfWeek = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() - today.getDay(),
+      );
+      const endOfWeek = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() + (6 - today.getDay()),
+      );
 
       const filtered = sampleWorkoutHistory.filter(item => {
         const workoutDate = new Date(item.date);
@@ -45,7 +69,7 @@ export const WorkoutHistoryScreen = () => {
     }
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({item}) => (
     <View style={styles.workoutItem}>
       <Text style={styles.workoutType}>{item.type}</Text>
       <Text style={styles.workoutDuration}>{item.duration}</Text>
